@@ -1,0 +1,10 @@
+Directory to savefile (Windows):
+%localappdata%/crosscode/
+
+choose cc.save
+
+When you're done, click the arrow pointing to the left
+to download the new savefile and replace the original savefile.
+
+I can't guarantee that the editor will work 100% of the time.
+So make a backup of your savefile before you replace it.
