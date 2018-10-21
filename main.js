@@ -45,6 +45,7 @@ function submitform() {
 			button.setAttribute("onclick", "loadsave(" + i + ")");
 			button.setAttribute("slot", i);
 			button.innerHTML = i;
+			button.style.display="block";
 			document.getElementById("button").appendChild(button);
 		}
 		var p = document.createElement("p");
