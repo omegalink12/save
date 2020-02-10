@@ -1,60 +1,76 @@
-var container = document.getElementById("jsoneditor");
-var editor = new JSONEditor(container, {});
-var input = document.querySelector('input');
-var loadedSave = false;
-var slot;
+const container = document.getElementById("jsoneditor");
+const editor = new JSONEditor(container, {});
+const input = document.querySelector('input');
+const button = document.querySelector('#button');
 input.addEventListener('change', submitform);
-window.e = editor;
-var inputValue;
-var jsonF;
-document.getElementById("i").onclick = inb;
-document.getElementById("o").onclick = outb;
-
-function loadsave(n) {
-    if (loadedSave) {
-        inputValue = jsonF.slots[n - 1];
-        document.getElementById("what save").innerHTML = "Slot loaded: " + n;
-        slot = n;
-    } else {
-        textArea.value = jsonF.slots[n - 1];
-    }
-    inb();
-}
 
 function submitform() {
     var file = document.getElementById("myFile").files[0];
 
     var reader = new FileReader();
-    reader.onload = function(e) {
-        jsonF = JSON.parse(e.target.result);
-        inputValue = jsonF.slots[0];
-        inb();
-        var button;
-        var i = 0;
-        document.getElementById("o").innerHTML = "save";
-        var inputButton = document.getElementById("i");
-        var textArea = document.getElementById("input");
-        inputButton.parentNode.removeChild(inputButton);
-        textArea.parentNode.removeChild(textArea);
-        document.getElementById("button").appendChild(document.createElement("br"));
-        document.getElementById("button").appendChild(document.createElement("br"));
-        for (var save of jsonF.slots) {
-            i++;
-            button = document.createElement("button");
-            button.setAttribute("onclick", "loadsave(" + i + ")");
-            button.setAttribute("slot", i);
-            button.innerHTML = i;
-            button.style.display = "block";
-            document.getElementById("button").appendChild(button);
-        }
-        var p = document.createElement("p");
-        slot = 1;
-        p.innerHTML = "Slot loaded: " + 1;
-        p.setAttribute("id", "what save")
-        document.getElementById("button").appendChild(p);
+    reader.onload = function({target}) {
+        const jsonF = JSON.parse(target.result);
+		loadSaveFile(jsonF);
     };
     reader.readAsText(file);
     loadedSave = true;
+}
+
+const slotTemplate = document.querySelector("#slot");
+
+function loadSaveFile(json) {
+	window.jsonFile = json;
+	let nodes = [];
+	if (json.globals) {
+		nodes.push(createGlobalsElement());
+	}
+
+	if (json.autoSlot) {
+		nodes.push(createSlotElement(-1));
+	} 
+
+	const slots = json.slots;
+	for (let i = 0; i < slots.length; i++) {
+		nodes.push(createSlotElement(i));
+	}
+
+	for (const node of nodes) {
+		button.appendChild(node);
+	}
+}
+
+function createGlobalsElement() {
+	const slot = slotTemplate.cloneNode();
+	slot.setAttribute('slot', 'globals');
+	slot.innerText = 'Globals';
+	return slot;
+}
+
+function createSlotElement(slotIndex) {
+	const slot = slotTemplate.cloneNode();
+	slot.setAttribute('slot', slotIndex);
+	if (slotIndex === -1) {
+		slot.innerText = "Auto Save";
+	} else if (slotIndex >= 0) {
+		slot.innerText = "Save " + (slotIndex + 1);
+	}
+	return slot;
+}
+
+function loadSlot(slot){
+	console.log(slot);
+	let component = null;
+	if (isFinite(slot)) {
+		if (slot === "-1") {
+			component = jsonFile["autoSlot"];
+		} else {
+			component = jsonFile.slots[slot];
+		}
+	} else {
+		component = jsonFile[slot];
+	}
+
+	loadSaveComponent(component);
 }
 
 function encode(s) {
@@ -65,19 +81,14 @@ function encode(s) {
     return new Uint8Array(out);
 }
 
-function inb() {
-    if (loadedSave) {
-        var s = inputValue;
-    } else {
-        var s = document.getElementById("in").value;
-    }
-    var j = inc(s, "a");
-    window.e.set(JSON.parse(j));
+function loadSaveComponent(data) {
+    const decrypted = decrypt(data, "a");
+    editor.set(JSON.parse(decrypted));
 }
 
-function outb() {
-    var s = window.e.get();
-    var j = outc(JSON.stringify(s), "a");
+function exportSave() {
+    var s = editor.get();
+    var j = encrypt(JSON.stringify(s), "a");
     if (loadedSave) {
         jsonF.slots[slot - 1] = j;
         var data = encode(JSON.stringify(jsonF, null, 4));
@@ -98,17 +109,17 @@ function outb() {
     }
 }
 
-function inc(a, b) {
-    if (b = 75 * b + "0") b = ":_." + b;
+function decrypt(data, key) {
+    if (key = 75 * key + "0") key = ":_." + key;
     var c = window.CryptoJS,
-        a = a.substr(9, a.length);
-    return c.AES.decrypt(a, b).toString(c.enc.Utf8);
+	data = data.substr(9, data.length);
+    return c.AES.decrypt(data, key).toString(c.enc.Utf8);
 }
 
 
-function outc(a, b) {
+function encrypt(data, key) {
     var c;
-    if (b = 75 * b + "0") b = ":_." + b;
-    c = window.CryptoJS.AES.encrypt(a, b).toString();
+    if (key = 75 * key + "0") key = ":_." + key;
+    c = window.CryptoJS.AES.encrypt(data, key).toString();
     return "[-!_0_!-]" + c;
 }
