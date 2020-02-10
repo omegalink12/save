@@ -1,5 +1,9 @@
 const container = document.getElementById("jsoneditor");
-const editor = new JSONEditor(container, {});
+const editor = new JSONEditor(container, {
+	onChangeText: function(data) {
+		updateSave(data)
+	}
+});
 const input = document.querySelector('input');
 const button = document.querySelector('#button');
 input.addEventListener('change', submitform);
@@ -55,6 +59,10 @@ function createSlotElement(slotIndex) {
 		slot.innerText = "Save " + (slotIndex + 1);
 	}
 	return slot;
+}
+
+function updateSave(data) {
+	console.log(data);
 }
 
 function loadSlot(slot){
