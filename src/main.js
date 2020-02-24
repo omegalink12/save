@@ -4,6 +4,7 @@ window.jsonFile = null;
 let saveChanges = {
 };
 const editor = new JSONEditor(container, {
+	history: true,
 	onChangeText: function(data) {
 		saveChanges[activeSlot] = data;
 	}
@@ -71,15 +72,19 @@ function createSlotElement(slotIndex) {
 
 function loadSlot(slot){
 	activeSlot = slot;
+	
 	let component = null;
 	if (isFinite(slot)) {
 		if (slot === "-1") {
 			component = jsonFile["autoSlot"];
+			editor.setName("Auto Slot");
 		} else {
 			component = jsonFile.slots[slot];
+			editor.setName("Slot " + (Number(slot) + 1));
 		}
 	} else {
 		component = jsonFile[slot];
+		editor.setName(slot);
 	}
 
 	loadSaveComponent(slot, component);
