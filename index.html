@@ -4,26 +4,25 @@
 <head>
 	<!-- when using the mode "code", it's important to specify charset utf-8 -->
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-	<link href="jsoneditor.min.css" rel="stylesheet" type="text/css">
-	<script src="jsoneditor-minimalist.min.js"></script>
-	<script src="c.js" type="text/javascript" charset="utf-8"></script>
+	<link href="lib/json-editor/jsoneditor.min.css" rel="stylesheet" type="text/css">
+	<script src="lib/json-editor/jsoneditor.min.js"></script>
+	<script src="lib/crypto.js" type="text/javascript" charset="utf-8"></script>
 </head>
 
 <body>
-	<div id=input style="float:left">
-		Select a file: <input type="file" id="myFile" accept=".save"><br>
-		<textarea id=in rows=30 cols=40 onclick="this.focus();this.select()"></textarea>
+	<div hidden>
+		<!-- Template  -->
+		<button id="slot" onclick="loadSlot(event.target.slot)" name="slot" slot="" style="display: block;"></button>
 	</div>
+	<div id=input>
+		Select a file: <input type="file" id="myFile" accept=".save"><br>
+		<button id="save" onclick="exportSave()" disabled>Save</button>
+	</div>
+	<hr />
 	<div id=button style="float:left">
-		<button id=i>
-			-->
-		</button>
-		<br>
-		<button id=o>
-			<-- </button>
 	</div>
 	<div id="jsoneditor" style=" float:left; width: 400px; height: 400px;"></div>
-	<script src="main.js"></script>
+	<script src="src/main.js"></script>
 </body>
 
 </html>
