@@ -1,3 +1,5 @@
+const ENCRYPTION_MARKER = '[-!_0_!-]';
+
 const container = document.getElementById("jsoneditor");
 const saveButton = document.querySelector('#save');
 window.jsonFile = null;
@@ -100,8 +102,8 @@ function encode(s) {
 
 function loadSaveComponent(slot, data) {
 	if (!saveChanges[slot]) {
-		const decrypted = decrypt(data, "a");
-		editor.set(JSON.parse(decrypted));
+		if (isEncrypted(data)) data = JSON.parse(decrypt(data, "a"));
+		editor.set(data);
 	} else {
 		editor.set(JSON.parse(saveChanges[slot]));
 	}
@@ -113,19 +115,22 @@ function compileChanges() {
 	const jsonFileCopy = JSON.parse(JSON.stringify(jsonFile));
 	for (const saveKey in saveChanges) {
 		const savedChange = saveChanges[saveKey];
-		const encryptedChange = encrypt(savedChange, "a");
 		if (isFinite(saveKey)) {
 			if (saveKey === "-1") {
-				jsonFileCopy["autoSlot"] = encryptedChange;
+				updateSaveFileKey(jsonFileCopy, "autoSlot", savedChange);
 			} else {
 				const slotNumber = Number(slot);
-				jsonFileCopy.slots[slotNumber] =  encryptedChange;
+				updateSaveFileKey(jsonFileCopy.slots, slotNumber, savedChange);
 			}
 		} else {
-			jsonFileCopy[saveKey] = encryptedChange;
+			updateSaveFileKey(jsonFileCopy, saveKey, savedChange);
 		}
 	}
 	return jsonFileCopy;
+}
+
+function updateSaveFileKey(obj, key, savedChange) {
+	obj[key] = isEncrypted(obj[key]) ? encrypt(savedChange, "a") : JSON.parse(savedChange);
 }
 
 function exportSave() {
@@ -158,5 +163,9 @@ function encrypt(data, key) {
 	var c;
 	if (key = 75 * key + "0") key = ":_." + key;
 	c = window.CryptoJS.AES.encrypt(data, key).toString();
-	return "[-!_0_!-]" + c;
+	return ENCRYPTION_MARKER + c;
+}
+
+function isEncrypted(data) {
+	return typeof data === 'string' && data.startsWith(ENCRYPTION_MARKER);
 }
