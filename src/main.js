@@ -119,7 +119,7 @@ function compileChanges() {
 			if (saveKey === "-1") {
 				updateSaveFileKey(jsonFileCopy, "autoSlot", savedChange);
 			} else {
-				const slotNumber = Number(slot);
+				const slotNumber = Number(saveKey);
 				updateSaveFileKey(jsonFileCopy.slots, slotNumber, savedChange);
 			}
 		} else {
